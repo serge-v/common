@@ -5,7 +5,6 @@
 #include <curl/curl.h>
 
 #include "net.h"
-#include "struct.h"
 
 /* ========= send_email using curl ========= */
 
@@ -199,56 +198,32 @@ send_email(const struct message *m, const char *password_file)
 	return curl_smtp_send(&gmail, m);
 }
 
-/* ========= fetch_url using curl ========= */
+/* ========= http request using curl ========= */
+
+#define HTTP_FOUND 302
 
 struct response
 {
-	int error;              /* curl error */
-	int code;               /* http error code */
-	size_t len;             /* http content length */
-	size_t recv;            /* currently received length */
-	const char *fname;      /* file name to store body */
-	FILE *f;                /* file handler to store body */
-	char *data;             /* if file name is null allocate http body in memory */
-	char *p;                /* pointer after current chunk */
+	int error;                  /* curl error */
+	int code;                   /* http error code */
+	size_t len;                 /* http content length */
+	struct buf* buf;            /* received data */
+	struct httpreq_opts *opts;  /* request options */
 };
 
-static void
-response_destroy(struct response* resp)
-{
-	if (resp->data != NULL)
-		free(resp->data);
-	memset(resp, 0, sizeof(struct response));
-}
+/* curl related */
 
 static size_t
 header_callback(char *buffer, size_t size, size_t nitems, void *userdata)
 {
-	struct response* resp = (struct response*)userdata;
+	struct response *resp = (struct response *)userdata;
 	size_t len = size * nitems;
 
-	if (strncmp("HTTP/1.", buffer, 7) == 0) {
+	if (strncmp("HTTP/1.", buffer, 7) == 0)
 		resp->code = atoi(&buffer[9]);
-		return len;
-	}
 
-	if (strncmp("Content-Length: ", buffer, 16) == 0) {
+	if (strncmp("Content-Length: ", buffer, 16) == 0)
 		resp->len = atoi(&buffer[16]);
-
-		if (resp->len == 0)
-			return len;
-
-		if (resp->fname != NULL) {
-			resp->f = fopen(resp->fname, "wt");
-			if (resp->f == NULL)
-					err(1, "Cannot open file %s. Error: %d", resp->fname, errno);
-			return len;
-		}
-
-		resp->data = malloc(resp->len);
-		resp->p = resp->data;
-		return len;
-	}
 
 	return len;
 }
@@ -256,152 +231,101 @@ header_callback(char *buffer, size_t size, size_t nitems, void *userdata)
 static size_t
 write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-	struct response* resp = (struct response*)userdata;
+	struct response *resp = (struct response *)userdata;
 	size_t len = size * nmemb;
 
-	resp->recv += len;
-
-	if (resp->recv > resp->len)
-		err(1, "Received %lu bytes that is more than expected %lu",
-		    resp->recv, resp->len);
-
-	if (resp->fname != NULL) {
-
-		int rc = fwrite(ptr, 1, len, resp->f);
-
-		if (rc == -1 || rc != len)
-			err(1, "Cannot write file %s. Error: %d", resp->fname, errno);
-
-		if (resp->recv == resp->len) {
-			fclose(resp->f);
-			resp->f = NULL;
+	if (len > 0) {
+		if (resp->opts != NULL && resp->opts->debug) {
+			fwrite(ptr, size, nmemb, stderr);
 		}
-
-		return len;
+		buf_append(resp->buf, ptr, len);
 	}
-
-	memcpy(resp->p, ptr, len);
-	resp->p += len;
 
 	return len;
 }
 
-static int
-curl_get(const char *url, struct response *resp)
+static size_t
+empty_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-	CURL *curl;
-	struct curl_slist *chunk = NULL;
+	struct response *resp = (struct response *)userdata;
+	size_t len = size * nmemb;
 
-	curl = curl_easy_init();
-	curl_easy_setopt(curl, CURLOPT_URL, url);
+	if (resp->opts != NULL && resp->opts->debug) {
+		fwrite(ptr, size, nmemb, stderr);
+	}
 
-	chunk = curl_slist_append(chunk,
-	    "Accept: "
-	    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
-
-	chunk = curl_slist_append(chunk,
-	    "User-Agent: "
-	    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) "
-	    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95");
-
-	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
-	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
-	curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
-	curl_easy_setopt(curl, CURLOPT_HEADERDATA, resp);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, resp);
-	CURLcode err = curl_easy_perform(curl);
-	resp->error = err;
-
-	curl_slist_free_all(chunk);
-	curl_easy_cleanup(curl);
-
-	return err;
+	return len;
 }
 
 int
-fetch_url(const char *url, const char *fname)
+httpreq(const char *url, struct buf *b, struct httpreq_opts *opts)
 {
-	int rc;
 	struct response resp;
-
 	memset(&resp, 0, sizeof(struct response));
-	resp.fname = fname;
+	struct buf local_buf;
 
-	rc = curl_get(url, &resp);
+	resp.buf = b;
+	resp.opts = opts;
 
-	if (rc != 0) {
-		fprintf(stderr, "Cannot fetch url %s. Curl error %d : %s\n",
-			url, resp.error, curl_easy_strerror(resp.error));
-		goto out;
+	if (b == NULL) {
+		buf_init(&local_buf);
+		resp.buf = &local_buf;
 	}
 
-	if (resp.code != 200) {
-		fprintf(stderr, "Cannot fetch url %s. HTTP error %d\n", url, resp.code);
-		rc = resp.code;
-		goto out;
-	}
-out:
-	response_destroy(&resp);
-	return rc;
-}
-
-static int
-curl_post(const char *url, const char *post_data, struct response *resp)
-{
-	CURL *curl;
-	struct curl_slist *chunk = NULL;
-
+	CURL* curl;
 	curl = curl_easy_init();
-
 	curl_easy_setopt(curl, CURLOPT_URL, url);
-
-	chunk = curl_slist_append(chunk,
-	    "Content-Type: text/xml,charset=utf-8");
-
-	chunk = curl_slist_append(chunk,
-	    "SOAPAction: \"http://www.altoromutual.com/bank/ws/GetUserAccounts\"");
-
-	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
-	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_data);
 	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+
+	if (opts != NULL && opts->debug)
+		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+
+	if (opts != NULL && opts->cookie_file != NULL) {
+		curl_easy_setopt(curl, CURLOPT_COOKIEFILE, opts->cookie_file);
+		curl_easy_setopt(curl, CURLOPT_COOKIEJAR, opts->cookie_file);
+	}
+
+	if (b == NULL && (opts == NULL || opts->resp_fname == NULL)) {
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, empty_callback);
+	} else {
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &resp);
+	}
+
+	if (opts != NULL && opts->post_data != NULL)
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, opts->post_data);
+
 	curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
-	curl_easy_setopt(curl, CURLOPT_HEADERDATA, resp);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, resp);
-	CURLcode err = curl_easy_perform(curl);
-	resp->error = err;
+	curl_easy_setopt(curl, CURLOPT_HEADERDATA, &resp);
+	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 15L);
+
+	const char *useragent =
+		"Mozilla/5.0 (Macintosh; U; Linux i686; en-US; rv:1.8.0.10) "
+		"Gecko/20070223 CentOS/1.5.0.10-0.1.el4.centos Firefox/2.0b2";
+
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
+
+	CURLcode curl_err = curl_easy_perform(curl);
+
+	if (curl_err != CURLE_OK)
+		fprintf(stderr, "fetch error: %s\n", curl_easy_strerror(curl_err));
 
 	curl_easy_cleanup(curl);
 
-	return err;
-}
-
-int
-post_url(const char *url, const char *post_data, const char *fname)
-{
-	int rc;
-	struct response resp;
-
-	memset(&resp, 0, sizeof(struct response));
-	resp.fname = fname;
-
-	rc = curl_post(url, post_data, &resp);
-
-	if (rc != 0) {
-		fprintf(stderr, "Cannot post to url %s. Curl error %d : %s\n",
-			url, resp.error, curl_easy_strerror(resp.error));
-		goto out;
+	if (curl_err == CURLE_OK && opts != NULL && opts->resp_fname != NULL && resp.buf != NULL) {
+		FILE *f = fopen(opts->resp_fname, "wb");
+		if (f == NULL)
+			err(1, "cannot open file: %s", opts->resp_fname);
+		fwrite(resp.buf->s, 1, resp.buf->len, f);
+		fclose(f);
 	}
 
-	if (resp.code != 200) {
-		fprintf(stderr, "Cannot post to url %s. HTTP error %d\n", url, resp.code);
-		rc = resp.code;
-		goto out;
-	}
-out:
-	response_destroy(&resp);
-	return rc;
+	if (curl_err == CURLE_OK && resp.code == HTTP_FOUND)
+		curl_err = HTTP_FOUND;
+
+	if (b == NULL)
+		buf_clean(&local_buf);
+
+	return curl_err;
 }
-
-

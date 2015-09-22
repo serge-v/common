@@ -1,3 +1,5 @@
+#include "struct.h"
+
 struct message
 {
 	const char *to;        /* recipient */
@@ -6,6 +8,13 @@ struct message
 	const char *body;      /* message body */
 };
 
+struct httpreq_opts
+{
+	const char *cookie_file;        /* use a file as a cookie jar */
+	const char *post_data;          /* do POST request with post_data */
+	const char *resp_fname;         /* write response to file */
+	int debug;                      /* curl verbose output */
+};
+
 int send_email(const struct message *m, const char *password_file);
-int fetch_url(const char *url, const char *fname);
-int post_url(const char *url, const char *post_data, const char *fname);
+int httpreq(const char *url, struct buf *b, struct httpreq_opts *opts);
