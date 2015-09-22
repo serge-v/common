@@ -262,8 +262,15 @@ httpreq(const char *url, struct buf *b, struct httpreq_opts *opts)
 {
 	struct response resp;
 	memset(&resp, 0, sizeof(struct response));
+	struct buf local_buf;
+
 	resp.buf = b;
 	resp.opts = opts;
+
+	if (b == NULL) {
+		buf_init(&local_buf);
+		resp.buf = &local_buf;
+	}
 
 	CURL* curl;
 	curl = curl_easy_init();
@@ -278,7 +285,7 @@ httpreq(const char *url, struct buf *b, struct httpreq_opts *opts)
 		curl_easy_setopt(curl, CURLOPT_COOKIEJAR, opts->cookie_file);
 	}
 
-	if (b == NULL) {
+	if (b == NULL && (opts == NULL || opts->resp_fname == NULL)) {
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, empty_callback);
 	} else {
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
@@ -316,6 +323,9 @@ httpreq(const char *url, struct buf *b, struct httpreq_opts *opts)
 
 	if (curl_err == CURLE_OK && resp.code == HTTP_FOUND)
 		curl_err = HTTP_FOUND;
+
+	if (b == NULL)
+		buf_clean(&local_buf);
 
 	return curl_err;
 }
