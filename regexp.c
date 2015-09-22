@@ -1,5 +1,8 @@
 #include "regexp.h"
-#include <regexp.h>
+#include <regex.h>
+#include <err.h>
+#include <stdlib.h>
+#include <string.h>
 
 static void
 print_rex_error(int errcode, const regex_t *preg)
