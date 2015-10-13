@@ -70,16 +70,16 @@ buf_replace(struct buf *buf, const char *rex_what, const char *replacement)
 		err(1, "no match. regex: %p", rex_what);
 
 	const char *orig = buf->s;
-	size_t len = buf->len - match[0].rm_eo + match[0].rm_so + 1;
+	size_t len = buf->len - match[0].rm_eo + match[0].rm_so;
 	if (replacement != NULL)
 		len += strlen(replacement);
 
-	char *s = calloc(1, len);
+	char *s = calloc(1, len + 1);
 	strncpy(s, orig, match[0].rm_so);  /* copy chunk before regexp */
 	if (replacement != NULL)
 		strcat(s, replacement);    /* copy replacement */
 	strcat(s, &orig[match[0].rm_eo]);  /* copy chunk after replacement */
-	s[len-1] = 0;
+	s[len - 1] = 0;
 
 	buf_clean(buf);
 
