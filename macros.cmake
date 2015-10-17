@@ -46,3 +46,18 @@ macro(gen_resource_c file)
 	set_source_files_properties(${cfile} ${hfile} PROPERTIES GENERATED TRUE)
 
 endmacro(gen_resource_c)
+
+macro(generate_resources src_list dst_list)
+
+	set(_src_list "${src_list}")
+	
+	foreach(res ${_src_list})
+		gen_resource_c(${res})
+		set(c ${CMAKE_CURRENT_BINARY_DIR}/${res}.c)
+		set(h ${CMAKE_CURRENT_BINARY_DIR}/${res}.h)
+		set(${dst_list} ${${dst_list}} ${c} ${h})
+		set_source_files_properties(${c} ${h} PROPERTIES GENERATED TRUE)
+
+	endforeach()
+
+endmacro(generate_resources)
