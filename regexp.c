@@ -1,5 +1,4 @@
 #include "regexp.h"
-#include <regex.h>
 #include <err.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +13,7 @@ print_rex_error(int errcode, const regex_t *preg)
 	err(1, "%s", buf);
 }
 
-static void
+void
 regex_compile(regex_t* rex, const char* pattern)
 {
 	int rc = regcomp(rex, pattern, REG_EXTENDED);
