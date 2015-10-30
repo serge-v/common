@@ -40,11 +40,14 @@ httpreq_parse(char* s, int len, struct httpreq* req)
 	p += sig_size;
 
 	const char conn_upgrade[] = "Connection: Upgrade\r\n";
+	const char upgrade_websocket[] = "Upgrade: websocket\r\n";
 	const char hdr_sec_websocket_key[] = "Sec-WebSocket-Key: ";
 
 	while (p != NULL && *p != '\r') {
 		if (strncmp(p, conn_upgrade, sizeof(conn_upgrade)-1) == 0) {
 			req->connection_upgrade = 1;
+		} else if (strncmp(p, upgrade_websocket, sizeof(upgrade_websocket)-1) == 0) {
+				req->connection_upgrade = 1;
 		} else if (strncmp(p, hdr_sec_websocket_key, sizeof(hdr_sec_websocket_key)-1) == 0) {
 			req->sec_websocket_key = p + sizeof(hdr_sec_websocket_key)-1;
 		}
