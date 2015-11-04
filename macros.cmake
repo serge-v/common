@@ -6,7 +6,7 @@ macro(gen_version_c)
 	add_custom_command(
 		OUTPUT ${hfile} ${cfile}
 		COMMAND
-			${CMAKE_CURRENT_SOURCE_DIR}/common/genversion.sh
+			${CMAKE_CURRENT_SOURCE_DIR}/../common/genversion.sh
 		ARGS
 			${CMAKE_CURRENT_BINARY_DIR}
 		DEPENDS [!v][!e][!r]*.c [!v][!e][!r]*.h *.sh CMakeLists.txt
@@ -29,12 +29,12 @@ macro(gen_resource_c file)
 			${hfile}
 			${cfile}
 		COMMAND
-			${CMAKE_CURRENT_SOURCE_DIR}/common/make_c.sh
+			${CMAKE_CURRENT_SOURCE_DIR}/../common/make_c.sh
 			${CMAKE_CURRENT_SOURCE_DIR}/${file}
 			${hfile}
 			${cfile}
 		DEPENDS
-			${CMAKE_CURRENT_SOURCE_DIR}/common/make_c.sh
+			${CMAKE_CURRENT_SOURCE_DIR}/../common/make_c.sh
 			${CMAKE_CURRENT_SOURCE_DIR}/${file}
 		WORKING_DIRECTORY
 			${CMAKE_CURRENT_SOURCE_DIR}
