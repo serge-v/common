@@ -73,17 +73,17 @@ buf_replace(struct buf *buf, const char *rex_what, const char *replacement)
 	if (replacement != NULL)
 		len += strlen(replacement);
 
-	char *s = calloc(1, len + 1);
+	char *s = calloc(1, len + 2);
 	strncpy(s, orig, match[0].rm_so);  /* copy chunk before regexp */
 	if (replacement != NULL)
 		strcat(s, replacement);    /* copy replacement */
 	strcat(s, &orig[match[0].rm_eo]);  /* copy chunk after replacement */
-	s[len - 1] = 0;
+	s[len+1] = 0;
 
 	buf_clean(buf);
 
 	buf->s = s;
 	buf->len = len;
-	buf->cap = len;
+	buf->cap = len + 2;
 	regfree(&rex);
 }
