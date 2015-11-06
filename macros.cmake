@@ -9,7 +9,7 @@ macro(gen_version_c)
 			${CMAKE_CURRENT_SOURCE_DIR}/../common/genversion.sh
 		ARGS
 			${CMAKE_CURRENT_BINARY_DIR}
-		DEPENDS [!v][!e][!r]*.c [!v][!e][!r]*.h *.sh CMakeLists.txt
+		DEPENDS *.c *.h *.sh CMakeLists.txt
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		COMMENT "Generating version.c, version.h"
 	)

@@ -1,10 +1,18 @@
 cmake_minimum_required(VERSION 3.2)
 
+find_package(LibXml2 REQUIRED)
+find_package(CURL REQUIRED)
+find_package(OpenSSL REQUIRED)
+
+include_directories(${LIBXML2_INCLUDE_DIR})
+include_directories(${OPENSSL_INCLUDE_DIR})
+
 add_library(
 	svc
-	socket.c socket.h
-	http.c http.h
-	struct.c struct.h
-	crypt.c crypt.h
-	net.c net.h
+	socket.c
+	http.c
+	struct.c
+	crypt.c
+	net.c
+	xml.c
 )
