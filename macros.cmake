@@ -29,15 +29,13 @@ macro(gen_resource_c file)
 			${hfile}
 			${cfile}
 		COMMAND
-			${CMAKE_CURRENT_SOURCE_DIR}/../common/make_c.sh
+			${CMAKE_BINARY_DIR}/bin/mkresource
+		ARGS
 			${CMAKE_CURRENT_SOURCE_DIR}/${file}
-			${hfile}
-			${cfile}
 		DEPENDS
-			${CMAKE_CURRENT_SOURCE_DIR}/../common/make_c.sh
 			${CMAKE_CURRENT_SOURCE_DIR}/${file}
 		WORKING_DIRECTORY
-			${CMAKE_CURRENT_SOURCE_DIR}
+			${CMAKE_CURRENT_BINARY_DIR}
 		COMMENT
 			"Generating ${file}.c, ${file}.h"
 	)

@@ -7,6 +7,8 @@ find_package(OpenSSL REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
 include_directories(${OPENSSL_INCLUDE_DIR})
 
+add_executable(mkresource mkresource.c)
+
 add_library(
 	svc
 	socket.c
@@ -16,3 +18,5 @@ add_library(
 	net.c
 	xml.c
 )
+
+add_dependencies(svc mkresource)
