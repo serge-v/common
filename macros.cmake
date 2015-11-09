@@ -6,7 +6,7 @@ macro(gen_version_c)
 	add_custom_command(
 		OUTPUT ${hfile} ${cfile}
 		COMMAND
-			${CMAKE_CURRENT_SOURCE_DIR}/../common/genversion.sh
+			${CMAKE_BINARY_DIR}/bin/mkversion
 		ARGS
 			${CMAKE_CURRENT_BINARY_DIR}
 		DEPENDS *.c *.h *.sh CMakeLists.txt
