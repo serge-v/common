@@ -15,7 +15,7 @@
 #include <err.h>
 
 
-static void
+static int
 exec_cmd(const char *cmd, FILE *fout)
 {
 	char s[500];
@@ -29,14 +29,16 @@ exec_cmd(const char *cmd, FILE *fout)
 	fputs(s, fout);
 	int rc = pclose(pcmd);
 	if (rc != 0)
-		errc(1, rc, "cannot execute: %s", cmd);
+		warnc(rc, "cannot execute: %s", cmd);
+	return rc;
 }
 
 int main(int argc, char **argv)
 {
-	FILE *fh, *fc;
+	FILE *fh = NULL, *fc = NULL;
 	char *hfile, *cfile;
 	const char *outdir;
+	int ret = 1;
 
 	if (argc < 2) {
 		printf("usage: mkversion OUTDIR\n");
@@ -49,33 +51,43 @@ int main(int argc, char **argv)
 	asprintf(&cfile, "%s/version.c", outdir);
 
 	fh = fopen(hfile, "wt");
-	if (fh == NULL)
-		err(1, "cannot open %s", hfile);
+	if (fh == NULL) {
+		warn("cannot open %s", hfile);
+		goto out;
+	}
 
 	fc = fopen(cfile, "wt");
-	if (fc == NULL)
-		err(1, "cannot open %s", cfile);
+	if (fc == NULL) {
+		warn("cannot open %s", cfile);
+		goto out;
+	}
 
 	fprintf(fh,
 		"extern const char app_version[];\n"
-		"extern const char app_date[];\n"
-		"extern const char app_diff_stat[];\n"
-		"extern const char app_diff_full[];\n");
-
-	fclose(fh);
+		"extern const char app_date[];\n");
 
 	fprintf(fc, "const char app_version[] = \"");
-	exec_cmd("git describe --tags --long", fc);
+	if (exec_cmd("git describe --tags --long", fc) != 0)
+		goto out;
 	fprintf(fc, "\";\n");
 
 	fprintf(fc, "const char app_date[] = \"");
-	exec_cmd("git log -n 1 --format=%ai", fc);
+	if (exec_cmd("git log -n 1 --format=%ai", fc) != 0)
+		goto out;
 	fprintf(fc, "\";\n");
 
-	fclose(fh);
-	fclose(fc);
+	ret = 0;
+out:
+	if (fh != NULL)
+		fclose(fh);
+
+	if (fc != NULL)
+		fclose(fc);
+
 	free(hfile);
 	free(cfile);
+
+	return ret;
 }
 
 
