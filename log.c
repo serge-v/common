@@ -39,4 +39,5 @@ logi(const char *fmt, ...)
 	vfprintf(logger, fmt, args);
 	fputs("\n", logger);
 	va_end (args);
+	fflush(logger);
 }
