@@ -16,6 +16,7 @@ list(APPEND SOURCES
 	crypt.c
 	net.c
 	regexp.c
+	log.c
 )
 
 if(LIBXML2_FOUND)

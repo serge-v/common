@@ -93,7 +93,7 @@ int main(int argc, char **argv)
 				fputs("\\\"", fc);
 				break;
 			case '\n':
-				fputs("\"\n\"", fc);
+				fputs("\\n\"\n\"", fc);
 				break;
 			default:
 				fputc(c, fc);
