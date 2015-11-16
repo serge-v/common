@@ -18,6 +18,7 @@ add_library(
 	crypt.c
 	net.c
 	xml.c
+	regexp.c
 )
 
 add_dependencies(svc mkresource mkversion)
