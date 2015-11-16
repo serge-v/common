@@ -17,7 +17,9 @@ usage()
 }
 
 static const char *fname;
-static const size_t NSIZE = 200;
+
+#define NSIZE 200
+
 static char name[NSIZE];
 static char h_fname[NSIZE+3];
 static char c_fname[NSIZE+3];

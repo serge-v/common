@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <err.h>
+#include <errno.h>
 
 
 static int
@@ -29,7 +30,7 @@ exec_cmd(const char *cmd, FILE *fout)
 	fputs(s, fout);
 	int rc = pclose(pcmd);
 	if (rc != 0)
-		warnc(rc, "cannot execute: %s", cmd);
+		warn("cannot execute: %s. Error: %s", cmd, strerror(errno));
 	return rc;
 }
 
