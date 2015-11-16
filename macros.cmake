@@ -1,3 +1,19 @@
+macro(find_gitrep gitdir tag)
+	exec_program(git ${gitdir}
+		ARGS describe --tags
+		OUTPUT_VARIABLE tagname
+		RETURN_VALUE retcode
+	)
+
+	if(NOT retcode EQUAL 0)
+		message(FATAL_ERROR "Cannot get tag for git repository ${gitdir}. Error: ${retcode}.")
+	endif()
+
+	if(NOT tagname EQUAL ${tag})
+		message(FATAL_ERROR "tag ${tag} is not found for git repository ${gitdir}.")
+	endif()
+endmacro(find_gitrep)
+
 macro(gen_version_c)
 
 	set(hfile ${CMAKE_CURRENT_BINARY_DIR}/version.h)
