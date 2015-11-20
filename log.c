@@ -31,9 +31,10 @@ logi(const char *fmt, ...)
 	struct tm utctm;
 
 	gmtime_r(&now, &utctm);
-	strftime(ts, 50, "%F %T ", &utctm);
+	strftime(ts, 50, "%F %T INFO  ", &utctm);
 
 	va_list args, cp;
+
 	va_start(args, fmt);
 	va_copy(cp, args);
 	fputs(ts, logger);
@@ -41,4 +42,11 @@ logi(const char *fmt, ...)
 	fputs("\n", logger);
 	va_end (args);
 	fflush(logger);
+
+	va_start(args, fmt);
+	va_copy(cp, args);
+	printf("%s", ts);
+	vprintf(fmt, args);
+	puts("");
+	va_end (args);
 }
