@@ -2,11 +2,36 @@
 // Dumb http server
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <errno.h>
 #include <err.h>
 #include <memory.h>
 #include "socket.h"
 #include "http.h"
+
+static bool
+next_header(char **ptr)
+{
+	char *p = *ptr;
+
+	p = strchr(p, '\r');
+	if (p == NULL) {
+		warn("invalid request");
+		return false;
+	}
+	*p = 0;
+	p++;
+	if (*p != '\n') {
+		warn("invalid request");
+		return false;
+	}
+
+	*p = 0;
+	p++;
+	*ptr = p;
+
+	return true;
+}
 
 int
 httpreq_parse(char* s, int len, struct httpreq* req)
@@ -44,6 +69,7 @@ httpreq_parse(char* s, int len, struct httpreq* req)
 	const char hdr_sec_websocket_key[] = "Sec-WebSocket-Key: ";
 
 	while (p != NULL && *p != '\r') {
+
 		if (strncmp(p, conn_upgrade, sizeof(conn_upgrade)-1) == 0) {
 			req->connection_upgrade = 1;
 		} else if (strncmp(p, upgrade_websocket, sizeof(upgrade_websocket)-1) == 0) {
@@ -52,19 +78,7 @@ httpreq_parse(char* s, int len, struct httpreq* req)
 			req->sec_websocket_key = p + sizeof(hdr_sec_websocket_key)-1;
 		}
 
-		p = strchr(p, '\r');
-		if (p == NULL) {
-			warn("invalid request");
-			return -1;
-		}
-		*p = 0;
-		p++;
-		if (*p != '\n') {
-			warn("invalid request");
-			return -1;
-		}
-		*p = 0;
-		p++;
+		next_header(&p);
 	}
 
 	return 0;
@@ -101,16 +115,17 @@ err:
 	return -1;
 }
 
+static char rbuf[20000];
+static struct buf resp;
+static struct sockaddr si_from;
+static socklen_t addrlen = sizeof(si_from);
+
 int
 httpd_accept(struct httpd *d)
 {
 	int asocket;
 	ssize_t size;
-	char rbuf[20000];
 	struct httpreq req;
-	struct buf resp;
-	struct sockaddr si_from;
-	socklen_t addrlen = sizeof(si_from);
 
 	buf_init(&resp);
 
@@ -145,7 +160,7 @@ httpd_accept(struct httpd *d)
 	resp.len = 0;
 	rbuf[size] = 0;
 
-	return 0;
+	return asocket;
 err:
 	return -1;
 }
