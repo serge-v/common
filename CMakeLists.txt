@@ -17,6 +17,9 @@ list(APPEND SOURCES
 	net.c
 	regexp.c
 	log.c
+	timer.c
+	arrays.c
+	bst.c
 )
 
 if(LIBXML2_FOUND)

@@ -9,6 +9,7 @@ struct httpreq
 	const char* method;
 	const char* path;
 	const char* sec_websocket_key;
+	const char* host;
 	int connection_upgrade;
 	int ownership_taken;
 };

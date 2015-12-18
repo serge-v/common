@@ -64,18 +64,21 @@ httpreq_parse(char* s, int len, struct httpreq* req)
 
 	p += sig_size;
 
+	const char host[] = "Host: ";
 	const char conn_upgrade[] = "Connection: Upgrade\r\n";
 	const char upgrade_websocket[] = "Upgrade: websocket\r\n";
 	const char hdr_sec_websocket_key[] = "Sec-WebSocket-Key: ";
 
 	while (p != NULL && *p != '\r') {
 
-		if (strncmp(p, conn_upgrade, sizeof(conn_upgrade)-1) == 0) {
+		if (strncmp(p, host, sizeof(host)-1) == 0) {
+			req->host = p + sizeof(host) - 1;
+		} else if (strncmp(p, conn_upgrade, sizeof(conn_upgrade)-1) == 0) {
 			req->connection_upgrade = 1;
 		} else if (strncmp(p, upgrade_websocket, sizeof(upgrade_websocket)-1) == 0) {
 				req->connection_upgrade = 1;
 		} else if (strncmp(p, hdr_sec_websocket_key, sizeof(hdr_sec_websocket_key)-1) == 0) {
-			req->sec_websocket_key = p + sizeof(hdr_sec_websocket_key)-1;
+			req->sec_websocket_key = p + sizeof(hdr_sec_websocket_key) - 1;
 		}
 
 		next_header(&p);
@@ -144,7 +147,8 @@ httpd_accept(struct httpd *d)
 	if (size == 0)
 		goto err;
 
-	printf("len: %lu, buf:\n%s\n", size, rbuf);
+	rbuf[size] = 0;
+//	printf("len: %lu, buf:\n%s\n", size, rbuf);
 
 	httpreq_parse(rbuf, size, &req);
 	printf("method: %s %s %zu\n", req.method, req.path, size);
@@ -154,7 +158,9 @@ httpd_accept(struct httpd *d)
 
 	if (!req.ownership_taken) {
 		send(asocket, resp.s, resp.len, 0);
+		fprintf(stderr, "sent: %zu, %d\n", asocket, resp.len);
 		close(asocket);
+		asocket = 0;
 	}
 
 	resp.len = 0;
