@@ -19,9 +19,17 @@ void array_msort(struct array* a, struct array* aux, int lo, int hi);
 /* bottom-up merge sort */
 void array_bumsort(struct array* a, struct array* aux);
 
-/* array based heap */
-void aheap_add(struct array* a, int element);
-int aheap_del_max(struct array* a);
+/* array based priority queues */
+
+void pqmax_init(struct array* a);
+void pqmax_add(struct array* a, int element);
+int pqmax_del(struct array* a);
+int pqmax_size(struct array* a);
+
+void pqmin_init(struct array* a);
+void pqmin_add(struct array* a, int element);
+int pqmin_del(struct array* a);
+int pqmin_size(struct array* a);
 
 struct sarray
 {

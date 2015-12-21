@@ -111,7 +111,7 @@ array_bumsort(struct array* a, struct array* aux)
 
 /* promote element in the binary heap */
 static void
-swim(struct array* a, int k)
+swim_max(struct array* a, int k)
 {
 	while (k > 1 && a->v[k/2] < a->v[k])
 	{
@@ -124,7 +124,20 @@ swim(struct array* a, int k)
 }
 
 static void
-sink(struct array* a, int k)
+swim_min(struct array* a, int k)
+{
+	while (k > 1 && a->v[k/2] > a->v[k])
+	{
+		/* swap element at position k with the parent at position at k/2 */
+		int swap = a->v[k];
+		a->v[k] = a->v[k/2];
+		a->v[k/2] = swap;
+		k = k / 2; /* get parent index */
+	}
+}
+
+static void
+sink_max(struct array* a, int k)
 {
 	int swap;
 	int N = a->len - 1;
@@ -146,17 +159,49 @@ sink(struct array* a, int k)
 	}
 }
 
-/* add element to the binary heap */
+static void
+sink_min(struct array* a, int k)
+{
+	int swap;
+	int N = a->len - 1;
+
+	while (2 * k <= N)
+	{
+		int j = 2 * k;
+
+		if (j < N && a->v[j] > a->v[j+1])
+			j++;
+
+		if (a->v[k] < a->v[j])
+			break;
+
+		swap = a->v[k];
+		a->v[k] = a->v[j];
+		a->v[j] = swap;
+		k = j;
+	}
+}
+
 void
-aheap_add(struct array* a, int element)
+pqmax_init(struct array* a)
+{
+	array_init(a, 10);
+	array_add(a, -1);    /* add dummy zero element */
+}
+
+void
+pqmax_add(struct array* a, int element)
 {
 	array_add(a, element);    /* add element to tme end */
-	swim(a, a->len-1);        /* swim it up */
+	swim_max(a, a->len-1);        /* swim it up */
 }
 
 int
-aheap_del_max(struct array* a)
+pqmax_del(struct array* a)
 {
+	if (a->len <= 1)
+		return -1;
+
 	int max, N, swap;
 	
 	max = a->v[1];
@@ -168,9 +213,57 @@ aheap_del_max(struct array* a)
 
 	a->len--;
 
-	sink(a, 1);
+	sink_max(a, 1);
 
 	return max;
+}
+
+int
+pqmax_size(struct array* a)
+{
+	return a->len - 1;
+}
+
+void
+pqmin_init(struct array* a)
+{
+	array_init(a, 10);
+	array_add(a, -1);    /* add dummy zero element */
+}
+
+void
+pqmin_add(struct array* a, int element)
+{
+	array_add(a, element);    /* add element to tme end */
+	swim_min(a, a->len-1);        /* swim it up */
+}
+
+int
+pqmin_del(struct array* a)
+{
+	if (a->len <= 1)
+		return -1;
+
+	int min, N, swap;
+	
+	min = a->v[1];
+	N = a->len - 1;
+
+	swap = a->v[1];
+	a->v[1] = a->v[N];
+	a->v[N] = swap;
+
+	a->len--;
+
+	sink_min(a, 1);
+
+	return min;
+}
+
+int
+pqmin_size(struct array* a)
+{
+	return a->len - 1;
 }
 
 /* ============================ string array ====================== */
