@@ -19,6 +19,7 @@ list(APPEND SOURCES
 	log.c
 	timer.c
 	arrays.c
+	parrays.c
 	bst.c
 )
 

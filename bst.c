@@ -45,7 +45,7 @@ bst_print(struct bnode* x, int level)
 
 	bst_print(x->left, level + 1);
 	bst_print(x->right, level + 1);
-	
+
 	printf("%d ", x->v);
 }
 

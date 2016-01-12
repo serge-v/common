@@ -54,7 +54,7 @@ array_merge(struct array* a, struct array* aux, int lo, int mid, int hi)
 
 	i = lo;
 	j = mid + 1;
-	
+
 	for (k = lo; k <= hi; k++)
 	{
 		if (i > mid)
@@ -89,7 +89,7 @@ array_bumsort(struct array* a, struct array* aux)
 	int sz, lo, n;
 
 	n = a->len;
-	
+
 	if (n != aux->len)
 	{
 		perror("arrays lenghts are not equal");
@@ -203,7 +203,7 @@ pqmax_del(struct array* a)
 		return -1;
 
 	int max, N, swap;
-	
+
 	max = a->v[1];
 	N = a->len - 1;
 
@@ -245,7 +245,7 @@ pqmin_del(struct array* a)
 		return -1;
 
 	int min, N, swap;
-	
+
 	min = a->v[1];
 	N = a->len - 1;
 
