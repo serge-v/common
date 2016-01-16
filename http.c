@@ -158,7 +158,7 @@ httpd_accept(struct httpd *d)
 
 	if (!req.ownership_taken) {
 		send(asocket, resp.s, resp.len, 0);
-		fprintf(stderr, "sent: %zu, %d\n", asocket, resp.len);
+		fprintf(stderr, "sent: %d, %zu\n", asocket, resp.len);
 		close(asocket);
 		asocket = 0;
 	}
@@ -170,3 +170,4 @@ httpd_accept(struct httpd *d)
 err:
 	return -1;
 }
+
