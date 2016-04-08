@@ -6,6 +6,7 @@ struct message
 	const char *from;      /* sender */
 	const char *subject;   /* message subject */
 	const char *body;      /* message body */
+	const char *content_type;
 };
 
 struct httpreq_opts

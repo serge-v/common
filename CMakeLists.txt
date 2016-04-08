@@ -21,6 +21,7 @@ list(APPEND SOURCES
 	arrays.c
 	parrays.c
 	bst.c
+	fs.c
 )
 
 if(LIBXML2_FOUND)

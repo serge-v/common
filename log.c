@@ -31,10 +31,8 @@ logi(const char *fmt, ...)
 
 	time_t now = time(NULL);
 	char ts[50];
-	struct tm utctm;
-
-	gmtime_r(&now, &utctm);
-	strftime(ts, 50, "%F %T INFO  ", &utctm);
+	struct tm *utctm = gmtime(&now);
+	strftime(ts, 50, "%F %T INFO  ", utctm);
 
 	va_list args, cp;
 
@@ -62,10 +60,8 @@ logwarn(const char *fmt, ...)
 
 	time_t now = time(NULL);
 	char ts[50];
-	struct tm utctm;
-
-	gmtime_r(&now, &utctm);
-	strftime(ts, 50, "%F %T WARN  ", &utctm);
+	struct tm *utctm = gmtime(&now);
+	strftime(ts, 50, "%F %T WARN  ", utctm);
 
 	va_list args, cp;
 
@@ -95,10 +91,8 @@ logfatal(const char *fmt, ...)
 
 	time_t now = time(NULL);
 	char ts[50];
-	struct tm utctm;
-
-	gmtime_r(&now, &utctm);
-	strftime(ts, 50, "%F %T FATAL ", &utctm);
+	struct tm *utctm = gmtime(&now);
+	strftime(ts, 50, "%F %T FATAL ", utctm);
 
 	va_list args, cp;
 

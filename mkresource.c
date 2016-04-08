@@ -110,4 +110,6 @@ int main(int argc, char **argv)
 	fclose(fc);
 	fclose(fh);
 	fclose(fin);
+
+	return 0;
 }
