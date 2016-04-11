@@ -1,3 +1,9 @@
+if(${CMAKE_MAKE_PROGRAM} MATCHES "/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild")
+	set(TOOLDIR ${CMAKE_BINARY_DIR}/bin/Debug)
+else()
+	set(TOOLDIR ${CMAKE_BINARY_DIR}/bin)
+endif()
+
 macro(find_gitrep gitdir tag)
 	exec_program(git ${gitdir}
 		ARGS describe --tags
@@ -22,7 +28,7 @@ macro(gen_version_c)
 	add_custom_command(
 		OUTPUT ${hfile} ${cfile}
 		COMMAND
-			${CMAKE_BINARY_DIR}/bin/mkversion
+			${TOOLDIR}/mkversion
 		ARGS
 			${CMAKE_CURRENT_BINARY_DIR}
 		DEPENDS *.c *.h *.sh CMakeLists.txt
@@ -45,7 +51,7 @@ macro(gen_resource_c file)
 			${hfile}
 			${cfile}
 		COMMAND
-			${CMAKE_BINARY_DIR}/bin/mkresource
+			${TOOLDIR}/mkresource
 		ARGS
 			${CMAKE_CURRENT_SOURCE_DIR}/${file}
 		DEPENDS
