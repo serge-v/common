@@ -24,14 +24,8 @@ list(APPEND SOURCES
 	parrays.c
 	bst.c
 	fs.c
+	xml.c
 )
-
-if(LIBXML2_FOUND)
-	include_directories(${LIBXML2_INCLUDE_DIR})
-	list(APPEND xml.c)
-else()
-	message("xml.c is OFF")
-endif()
 
 add_library(
 	svc
