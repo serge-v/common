@@ -62,7 +62,7 @@ message_compose(const struct message *m, struct buf *b)
 
 	buf_append(b, "\r\n", 2);
 	buf_appendf(b, "--frontier\r\n");
-	buf_appendf(b, "Content-Type: %s; charset=\"us-ascii\"\r\n", m->content_type);
+	buf_appendf(b, "Content-Type: %s; charset=\"us-ascii\"\r\n", content_type);
 	buf_appendf(b, "MIME-Version: 1.0\r\n");
 	buf_appendf(b, "Content-Transfer-Encoding: 7bit\r\n");
 	buf_append(b, "\r\n", 2);
