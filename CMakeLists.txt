@@ -7,6 +7,7 @@ find_package(CURL REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 include_directories(${OPENSSL_INCLUDE_DIR})
+include_directories(${LIBXML2_INCLUDE_DIR})
 
 add_executable(mkresource mkresource.c)
 add_executable(mkversion mkversion.c)
