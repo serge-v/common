@@ -313,15 +313,25 @@ httpreq(const char *url, struct buf *b, struct httpreq_opts *opts)
 
 	CURLcode curl_err = curl_easy_perform(curl);
 
-	if (curl_err != CURLE_OK)
-		fprintf(stderr, "fetch error: %s\n", curl_easy_strerror(curl_err));
+	if (curl_err != CURLE_OK) {
+		if (opts->error != NULL)
+			snprintf(opts->error, opts->error_size - 1, "httpreq: %s", curl_easy_strerror(curl_err));
+		else
+			fprintf(stderr, "fetch error: %s\n", curl_easy_strerror(curl_err));
+	}
 
 	curl_easy_cleanup(curl);
 
 	if (curl_err == CURLE_OK && opts != NULL && opts->resp_fname != NULL && resp.buf != NULL) {
 		FILE *f = fopen(opts->resp_fname, "wb");
-		if (f == NULL)
-			err(1, "cannot open file: %s", opts->resp_fname);
+		if (f == NULL) {
+			if (opts->error != NULL) {
+				snprintf(opts->error, opts->error_size - 1,
+					 "httpreq: cannot open file: %s", opts->resp_fname);
+			} else {
+				err(1, "httpreq: cannot open file: %s", opts->resp_fname);
+			}
+		}
 		fwrite(resp.buf->s, 1, resp.buf->len, f);
 		fclose(f);
 	}
