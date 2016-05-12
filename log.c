@@ -5,8 +5,10 @@
 #include <errno.h>
 #include <err.h>
 #include <string.h>
+#include <stdbool.h>
 
 static FILE *logger;
+static bool console = false;
 
 void
 log_open(const char *fname)
@@ -14,6 +16,12 @@ log_open(const char *fname)
 	logger = fopen(fname, "at");
 	if (logger == NULL)
 		err(1, "cannot open log file %s", fname);
+}
+
+void
+log_set(FILE *log)
+{
+	logger = log;
 }
 
 void
@@ -44,12 +52,14 @@ logi(const char *fmt, ...)
 	va_end (args);
 	fflush(logger);
 
-	va_start(args, fmt);
-	va_copy(cp, args);
-	printf("%s", ts);
-	vprintf(fmt, args);
-	puts("");
-	va_end (args);
+	if (console) {
+		va_start(args, fmt);
+		va_copy(cp, args);
+		printf("%s", ts);
+		vprintf(fmt, args);
+		puts("");
+		va_end (args);
+	}
 }
 
 void
@@ -73,12 +83,14 @@ logwarn(const char *fmt, ...)
 	va_end (args);
 	fflush(logger);
 
-	va_start(args, fmt);
-	va_copy(cp, args);
-	fprintf(stderr, "\x1b[32m%s", ts);
-	vfprintf(stderr, fmt, args);
-	fprintf(stderr, "\x1b[0m\n");
-	va_end (args);
+	if (console) {
+		va_start(args, fmt);
+		va_copy(cp, args);
+		fprintf(stderr, "\x1b[32m%s", ts);
+		vfprintf(stderr, fmt, args);
+		fprintf(stderr, "\x1b[0m\n");
+		va_end (args);
+	}
 }
 
 void
@@ -106,13 +118,15 @@ logfatal(const char *fmt, ...)
 	va_end (args);
 	fflush(logger);
 
-	va_start(args, fmt);
-	va_copy(cp, args);
-	fprintf(stderr, "\x1b[31m%s", ts);
-	vfprintf(stderr, fmt, args);
-	if (err > 0)
-		fprintf(stderr, ": %d: %s", err, strerror(err));
-	fprintf(stderr, "\x1b[0m\n");
-	va_end (args);
+	if (console) {
+		va_start(args, fmt);
+		va_copy(cp, args);
+		fprintf(stderr, "\x1b[31m%s", ts);
+		vfprintf(stderr, fmt, args);
+		if (err > 0)
+			fprintf(stderr, ": %d: %s", err, strerror(err));
+		fprintf(stderr, "\x1b[0m\n");
+		va_end (args);
+	}
 	exit(1);
 }
