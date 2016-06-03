@@ -262,6 +262,26 @@ empty_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 	return len;
 }
 
+struct str_data {
+	const char *str;
+	size_t len;
+	size_t sent;
+};
+
+static size_t
+read_str_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
+{
+	struct str_data *ud = (struct str_data *)userdata;
+
+	if (ud->sent >= ud->len)
+		return 0;
+
+	size_t len = size * nmemb;
+	strncpy(ptr, &ud->str[ud->sent], len);
+	ud->sent += strlen(ud->str);
+	return ud->sent;
+}
+
 int
 httpreq(const char *url, struct buf *b, struct httpreq_opts *opts)
 {
@@ -310,11 +330,23 @@ httpreq(const char *url, struct buf *b, struct httpreq_opts *opts)
 	if (opts->authorization != NULL)
 		headers = curl_slist_append(headers, opts->authorization);
 
+	struct str_data put_data = {0};
+
+	if (opts->method != NULL && strcmp(opts->method, "PUT") == 0) {
+
+		put_data.len = strlen(opts->post_data);
+		put_data.str = opts->post_data;
+
+		curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_str_callback);
+		curl_easy_setopt(curl, CURLOPT_READDATA, &put_data);
+		curl_easy_setopt(curl, CURLOPT_INFILESIZE, put_data.len);
+		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);                 /* set PUT method */
+		headers = curl_slist_append(headers, "Expect:");            /* no 100-Continue */
+		headers = curl_slist_append(headers, "Transfer-Encoding:"); /* no chunks */
+	}
+
 	if (headers != NULL)
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-	if (opts->method != NULL && strcmp(opts->method, "PUT") == 0)
-		curl_easy_setopt(curl, CURLOPT_PUT, 1L);
 
 	const char *useragent =
 		"Mozilla/5.0 (Macintosh; U; Linux i686; en-US; rv:1.8.0.10) "
