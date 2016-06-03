@@ -1,4 +1,5 @@
-if(${CMAKE_MAKE_PROGRAM} MATCHES "/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild")
+message(CMAKE_MAKE_PROGRAM: "${CMAKE_MAKE_PROGRAM}")
+if(${CMAKE_MAKE_PROGRAM} MATCHES "xcodebuild")
 	set(TOOLDIR ${CMAKE_BINARY_DIR}/bin/Debug)
 else()
 	set(TOOLDIR ${CMAKE_BINARY_DIR}/bin)
