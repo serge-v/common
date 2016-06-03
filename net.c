@@ -62,7 +62,7 @@ message_compose(const struct message *m, struct buf *b)
 
 	buf_append(b, "\r\n", 2);
 	buf_appendf(b, "--frontier\r\n");
-	buf_appendf(b, "Content-Type: %s; charset=\"us-ascii\"\r\n", m->content_type);
+	buf_appendf(b, "Content-Type: %s; charset=\"us-ascii\"\r\n", content_type);
 	buf_appendf(b, "MIME-Version: 1.0\r\n");
 	buf_appendf(b, "Content-Transfer-Encoding: 7bit\r\n");
 	buf_append(b, "\r\n", 2);
@@ -324,15 +324,25 @@ httpreq(const char *url, struct buf *b, struct httpreq_opts *opts)
 
 	CURLcode curl_err = curl_easy_perform(curl);
 
-	if (curl_err != CURLE_OK)
-		fprintf(stderr, "fetch error: %s\n", curl_easy_strerror(curl_err));
+	if (curl_err != CURLE_OK) {
+		if (opts->error != NULL)
+			snprintf(opts->error, opts->error_size - 1, "httpreq: %s", curl_easy_strerror(curl_err));
+		else
+			fprintf(stderr, "fetch error: %s\n", curl_easy_strerror(curl_err));
+	}
 
 	curl_easy_cleanup(curl);
 
 	if (curl_err == CURLE_OK && opts != NULL && opts->resp_fname != NULL && resp.buf != NULL) {
 		FILE *f = fopen(opts->resp_fname, "wb");
-		if (f == NULL)
-			err(1, "cannot open file: %s", opts->resp_fname);
+		if (f == NULL) {
+			if (opts->error != NULL) {
+				snprintf(opts->error, opts->error_size - 1,
+					 "httpreq: cannot open file: %s", opts->resp_fname);
+			} else {
+				err(1, "httpreq: cannot open file: %s", opts->resp_fname);
+			}
+		}
 		fwrite(resp.buf->s, 1, resp.buf->len, f);
 		fclose(f);
 	}

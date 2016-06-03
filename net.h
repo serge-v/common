@@ -17,6 +17,8 @@ struct httpreq_opts
 	const char *post_data;          /* do POST request with post_data */
 	const char *resp_fname;         /* write response to file */
 	int debug;                      /* curl verbose output */
+	char *error;                    /* output error here */
+	size_t error_size;              /* size of the error buffer */
 };
 
 int send_email(const struct message *m, const char *password_file);
