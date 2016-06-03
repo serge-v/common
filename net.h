@@ -11,6 +11,8 @@ struct message
 
 struct httpreq_opts
 {
+	const char *method;
+	const char *authorization;
 	const char *cookie_file;        /* use a file as a cookie jar */
 	const char *post_data;          /* do POST request with post_data */
 	const char *resp_fname;         /* write response to file */

@@ -305,6 +305,17 @@ httpreq(const char *url, struct buf *b, struct httpreq_opts *opts)
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 15L);
 
+	struct curl_slist *headers = NULL;
+
+	if (opts->authorization != NULL)
+		headers = curl_slist_append(headers, opts->authorization);
+
+	if (headers != NULL)
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+	if (opts->method != NULL && strcmp(opts->method, "PUT") == 0)
+		curl_easy_setopt(curl, CURLOPT_PUT, 1L);
+
 	const char *useragent =
 		"Mozilla/5.0 (Macintosh; U; Linux i686; en-US; rv:1.8.0.10) "
 		"Gecko/20070223 CentOS/1.5.0.10-0.1.el4.centos Firefox/2.0b2";
