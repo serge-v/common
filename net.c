@@ -330,6 +330,12 @@ httpreq(const char *url, struct buf *b, struct httpreq_opts *opts)
 	if (opts->authorization != NULL)
 		headers = curl_slist_append(headers, opts->authorization);
 
+	if (opts != NULL && opts->content_type != NULL) {
+		char header[500];
+		snprintf(header, 499, "Content-Type: %s", opts->content_type);
+		headers = curl_slist_append(headers, header);
+	}
+
 	struct str_data put_data = {0};
 
 	if (opts->method != NULL && strcmp(opts->method, "PUT") == 0) {
@@ -341,6 +347,11 @@ httpreq(const char *url, struct buf *b, struct httpreq_opts *opts)
 		curl_easy_setopt(curl, CURLOPT_READDATA, &put_data);
 		curl_easy_setopt(curl, CURLOPT_INFILESIZE, put_data.len);
 		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);                 /* set PUT method */
+		headers = curl_slist_append(headers, "Expect:");            /* no 100-Continue */
+		headers = curl_slist_append(headers, "Transfer-Encoding:"); /* no chunks */
+	}
+
+	if (opts->post_data != NULL) {
 		headers = curl_slist_append(headers, "Expect:");            /* no 100-Continue */
 		headers = curl_slist_append(headers, "Transfer-Encoding:"); /* no chunks */
 	}
