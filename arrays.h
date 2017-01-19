@@ -11,10 +11,10 @@ void array_init(struct array *a, size_t capacity);
 void array_add(struct array *a, int element);
 void array_free(struct array *a);
 void array_print(struct array* a);
-void array_merge(struct array* a, struct array* aux, int lo, int mid, int hi);
+void array_merge(struct array* a, struct array* aux, size_t lo, size_t mid, size_t hi);
 
 /* merge top-bottom sort */
-void array_msort(struct array* a, struct array* aux, int lo, int hi);
+void array_msort(struct array* a, struct array* aux, size_t lo, size_t hi);
 
 /* bottom-up merge sort */
 void array_bumsort(struct array* a, struct array* aux);
@@ -24,12 +24,12 @@ void array_bumsort(struct array* a, struct array* aux);
 void pqmax_init(struct array* a);
 void pqmax_add(struct array* a, int element);
 int pqmax_del(struct array* a);
-int pqmax_size(struct array* a);
+size_t pqmax_size(struct array* a);
 
 void pqmin_init(struct array* a);
 void pqmin_add(struct array* a, int element);
 int pqmin_del(struct array* a);
-int pqmin_size(struct array* a);
+size_t pqmin_size(struct array* a);
 
 struct sarray
 {
@@ -42,10 +42,10 @@ void sarray_init(struct sarray *a, size_t capacity);
 void sarray_add(struct sarray *a, const char* element);
 void sarray_free(struct sarray *a);
 void sarray_print(struct sarray* a);
-void sarray_merge(struct sarray* a, struct sarray* aux, int lo, int mid, int hi);
+void sarray_merge(struct sarray* a, struct sarray* aux, size_t lo, size_t mid, size_t hi);
 
 /* merge sort */
-void sarray_msort(struct sarray* a, struct sarray* aux, int lo, int hi, struct sarray* ca);
+void sarray_msort(struct sarray* a, struct sarray* aux, size_t lo, size_t hi, struct sarray* ca);
 
 /* bottom-up merge sort */
 void sarray_bumsort(struct sarray* a, struct sarray* aux, struct sarray* ca);

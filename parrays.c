@@ -51,7 +51,7 @@ swap(struct parray* a, size_t x, size_t y)
 }
 
 static void
-swim_min(struct parray* a, int k)
+swim_min(struct parray* a, size_t k)
 {
 	while (k > 1 && a->comp(a->v[k/2], a->v[k]) > 0) {
 		swap(a, k, k/2); /* swap element at position k with the parent at position at k/2 */
@@ -60,12 +60,12 @@ swim_min(struct parray* a, int k)
 }
 
 static void
-sink_min(struct parray* a, int k)
+sink_min(struct parray* a, size_t k)
 {
-	int N = a->len - 1;
+	size_t N = a->len - 1;
 
 	while (2 * k <= N) {
-		int j = 2 * k;
+		size_t j = 2 * k;
 
 		if (j < N && a->comp(a->v[j], a->v[j+1]) > 0)
 			j++;

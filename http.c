@@ -34,7 +34,7 @@ next_header(char **ptr)
 }
 
 int
-httpreq_parse(char* s, int len, struct httpreq* req)
+httpreq_parse(char* s, size_t len, struct httpreq* req)
 {
 	char* p = s;
 	memset(req, 0, sizeof(struct httpreq));

@@ -45,9 +45,9 @@ array_print(struct array* a)
 }
 
 void
-array_merge(struct array* a, struct array* aux, int lo, int mid, int hi)
+array_merge(struct array* a, struct array* aux, size_t lo, size_t mid, size_t hi)
 {
-	int i, j, k = 0;
+	size_t i, j, k = 0;
 
 	for (k = lo; k <= hi; k++)
 		aux->v[k] = a->v[k];
@@ -69,9 +69,9 @@ array_merge(struct array* a, struct array* aux, int lo, int mid, int hi)
 }
 
 void
-array_msort(struct array* a, struct array* aux, int lo, int hi)
+array_msort(struct array* a, struct array* aux, size_t lo, size_t hi)
 {
-	int mid;
+	size_t mid;
 
 	if (hi <= lo)
 		return;
@@ -86,7 +86,7 @@ array_msort(struct array* a, struct array* aux, int lo, int hi)
 void 
 array_bumsort(struct array* a, struct array* aux)
 {
-	int sz, lo, n;
+	size_t sz, lo, n;
 
 	n = a->len;
 
@@ -100,7 +100,7 @@ array_bumsort(struct array* a, struct array* aux)
 	{
 		for (lo = 0; lo < n - sz; lo += sz + sz)
 		{
-			int hi = lo + sz + sz - 1;
+			size_t hi = lo + sz + sz - 1;
 			if (n - 1 < hi)
 				hi = n - 1;
 			array_merge(a, aux, lo, lo + sz - 1, hi);
@@ -111,7 +111,7 @@ array_bumsort(struct array* a, struct array* aux)
 
 /* promote element in the binary heap */
 static void
-swim_max(struct array* a, int k)
+swim_max(struct array* a, size_t k)
 {
 	while (k > 1 && a->v[k/2] < a->v[k])
 	{
@@ -124,7 +124,7 @@ swim_max(struct array* a, int k)
 }
 
 static void
-swim_min(struct array* a, int k)
+swim_min(struct array* a, size_t k)
 {
 	while (k > 1 && a->v[k/2] > a->v[k])
 	{
@@ -137,14 +137,14 @@ swim_min(struct array* a, int k)
 }
 
 static void
-sink_max(struct array* a, int k)
+sink_max(struct array* a, size_t k)
 {
 	int swap;
-	int N = a->len - 1;
+	size_t N = a->len - 1;
 
 	while (2 * k <= N)
 	{
-		int j = 2 * k;
+		size_t j = 2 * k;
 
 		if (j < N && a->v[j] < a->v[j+1])
 			j++;
@@ -160,14 +160,14 @@ sink_max(struct array* a, int k)
 }
 
 static void
-sink_min(struct array* a, int k)
+sink_min(struct array* a, size_t k)
 {
 	int swap;
-	int N = a->len - 1;
+	size_t N = a->len - 1;
 
 	while (2 * k <= N)
 	{
-		int j = 2 * k;
+		size_t j = 2 * k;
 
 		if (j < N && a->v[j] > a->v[j+1])
 			j++;
@@ -202,7 +202,8 @@ pqmax_del(struct array* a)
 	if (a->len <= 1)
 		return -1;
 
-	int max, N, swap;
+	int max, swap;
+	size_t N;
 
 	max = a->v[1];
 	N = a->len - 1;
@@ -218,7 +219,7 @@ pqmax_del(struct array* a)
 	return max;
 }
 
-int
+size_t
 pqmax_size(struct array* a)
 {
 	return a->len - 1;
@@ -244,7 +245,8 @@ pqmin_del(struct array* a)
 	if (a->len <= 1)
 		return -1;
 
-	int min, N, swap;
+	int min, swap;
+	size_t N;
 
 	min = a->v[1];
 	N = a->len - 1;
@@ -260,7 +262,7 @@ pqmin_del(struct array* a)
 	return min;
 }
 
-int
+size_t
 pqmin_size(struct array* a)
 {
 	return a->len - 1;
@@ -315,9 +317,9 @@ sarray_print(struct sarray* a)
 }
 
 void 
-sarray_merge(struct sarray* a, struct sarray* aux, int lo, int mid, int hi)
+sarray_merge(struct sarray* a, struct sarray* aux, size_t lo, size_t mid, size_t hi)
 {
-	int i, j, k = 0;
+	size_t i, j, k = 0;
 
 	for (k = lo; k <= hi; k++)
 		aux->v[k] = a->v[k];
@@ -338,7 +340,7 @@ sarray_merge(struct sarray* a, struct sarray* aux, int lo, int mid, int hi)
 	}
 }
 
-int 
+size_t
 sarray_cmp(struct sarray* a, struct sarray* b)
 {
         int i;
@@ -358,9 +360,9 @@ sarray_cmp(struct sarray* a, struct sarray* b)
 }
 
 void 
-sarray_msort(struct sarray* a, struct sarray* aux, int lo, int hi, struct sarray* ca)
+sarray_msort(struct sarray* a, struct sarray* aux, size_t lo, size_t hi, struct sarray* ca)
 {
-	int mid;
+	size_t mid;
 
 	if (hi <= lo)
 		return;
@@ -379,7 +381,7 @@ sarray_msort(struct sarray* a, struct sarray* aux, int lo, int hi, struct sarray
 void 
 sarray_bumsort(struct sarray* a, struct sarray* aux, struct sarray* ca)
 {
-	int sz, lo, n;
+	size_t sz, lo, n;
 
 	n = a->len;
 
@@ -393,7 +395,7 @@ sarray_bumsort(struct sarray* a, struct sarray* aux, struct sarray* ca)
 	{
 		for (lo = 0; lo < n - sz; lo += sz + sz)
 		{
-			int hi = lo + sz + sz - 1;
+			size_t hi = lo + sz + sz - 1;
 			if (n - 1 < hi)
 				hi = n - 1;
 			sarray_merge(a, aux, lo, lo + sz - 1, hi);

@@ -43,7 +43,7 @@ message_compose(const struct message *m, struct buf *b)
 
 	time_t now = time(NULL);
 
-	int n = strftime(s, sz, "Date: %a, %d %b %Y %T %z\r\n", gmtime(&now));
+	size_t n = strftime(s, sz, "Date: %a, %d %b %Y %T %z\r\n", gmtime(&now));
 	buf_append(b, s, n);
 
 	n = snprintf(s, sz, "To: %s\r\n", m->to);

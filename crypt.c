@@ -13,7 +13,7 @@ base64_encode(const unsigned char* s, size_t length, char** out)
 	bio = BIO_push(b64, bio);
 
 	BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL);
-	BIO_write(bio, s, length);
+	BIO_write(bio, s, (int)length);
 	BIO_flush(bio);
 	BIO_get_mem_ptr(bio, &buffer);
 	BIO_set_close(bio, BIO_NOCLOSE);
