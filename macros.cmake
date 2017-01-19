@@ -47,6 +47,8 @@ macro(gen_resource_c file)
 	set(hfile ${CMAKE_CURRENT_BINARY_DIR}/${file}.h)
 	set(cfile ${CMAKE_CURRENT_BINARY_DIR}/${file}.c)
 
+	get_filename_component(OUTDIR ${hfile} DIRECTORY)
+
 	add_custom_command(
 		OUTPUT
 			${hfile}
@@ -58,7 +60,7 @@ macro(gen_resource_c file)
 		DEPENDS
 			${CMAKE_CURRENT_SOURCE_DIR}/${file}
 		WORKING_DIRECTORY
-			${CMAKE_CURRENT_BINARY_DIR}
+			${OUTDIR}
 		COMMENT
 			"Generating ${file}.c, ${file}.h"
 	)
