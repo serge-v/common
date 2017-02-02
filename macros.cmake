@@ -62,7 +62,7 @@ macro(gen_resource_c file)
 		WORKING_DIRECTORY
 			${OUTDIR}
 		COMMENT
-			"Generating ${file}.c, ${file}.h"
+			"Generating ${hfile}, ${cfile}"
 	)
 
 	set_directory_properties(ADDITIONAL_MAKE_CLEAN_FILES ${cfile} ${hfile})

@@ -109,7 +109,8 @@ int add_membership(int socket, const char* address)
 int send_command(const char* address, int port, const char* command, int clients)
 {
 	struct sockaddr_in si, si_remote;
-	int s, i, len, rc = 0;
+	int s, i, rc = 0;
+	ssize_t len = 0;
 	socklen_t slen = sizeof(si);
 	const int BUFLEN = 4096;
 	char buf[BUFLEN];
